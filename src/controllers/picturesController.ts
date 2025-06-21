@@ -11,8 +11,9 @@ export default async function triggerPicture(req: Request, res: Response) {
 async function takePicture() {
   const baseCommand = process.env.TAKE_PICTURE_BASE_COMMAND!;
 
+  const timestamp = unixTimestamp();
   const uid = shortid.generate();
-  const pictureFilename = `${uid}.jpg`;
+  const pictureFilename = `${uid}_${timestamp}.jpg`;
 
   const fullCommand = `${baseCommand} ${pictureFilename}`;
 
@@ -25,4 +26,8 @@ async function takePicture() {
   });
 
   return pictureFilename;
+}
+
+function unixTimestamp() {
+  return Math.floor(Date.now() / 1000);
 }
