@@ -1,11 +1,15 @@
 import { Request, Response } from "express";
 import { exec } from "child_process";
 import shortid from "shortid";
+import fs from "fs/promises";
+import AWS from "aws-sdk";
 
 export default async function triggerPicture(req: Request, res: Response) {
   const pictureFilename = await takePicture();
 
-  res.status(201).send(pictureFilename);
+  const s3BucketLocation = await uploadToS3(pictureFilename);
+
+  res.status(201).send(s3BucketLocation);
 }
 
 async function takePicture() {
@@ -30,4 +34,27 @@ async function takePicture() {
 
 function unixTimestamp() {
   return Math.floor(Date.now() / 1000);
+}
+
+async function uploadToS3(fileName: string) {
+  AWS.config.update({
+    region: "sa-east-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  });
+
+  const s3 = new AWS.S3();
+
+  const pictureContent = await fs.readFile(`pictures/${fileName}`);
+
+  const params = {
+    Bucket: "xuletapictures",
+    Key: fileName,
+    Body: pictureContent,
+  };
+
+  const result = await s3.upload(params).promise();
+  console.log(result);
+  console.log("Location: ", result.Location);
+  return result.Location;
 }
