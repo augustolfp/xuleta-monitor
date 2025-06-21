@@ -23,6 +23,8 @@ export default async function triggerPicture(req: Request, res: Response) {
     ],
   });
 
+  await fs.unlink(`pictures/${pictureFilename}`);
+
   res.status(201).send(s3BucketLocation);
 }
 
