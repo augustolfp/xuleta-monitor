@@ -7,6 +7,7 @@ export default function errorHandlerMW(
   res: Response,
   next: NextFunction
 ) {
+  console.log(err);
   const statusCode = err.statusCode ?? 500;
   const message = err.statusCode ? err.message : "Internal Server Error";
   res.status(statusCode).json({ message });
