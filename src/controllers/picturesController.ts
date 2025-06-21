@@ -45,6 +45,8 @@ async function takePicture() {
     });
   });
 
+  console.log(result);
+
   return pictureFilename;
 }
 
