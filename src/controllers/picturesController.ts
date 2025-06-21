@@ -3,11 +3,25 @@ import { exec } from "child_process";
 import shortid from "shortid";
 import fs from "fs/promises";
 import AWS from "aws-sdk";
+import axios from "axios";
 
 export default async function triggerPicture(req: Request, res: Response) {
   const pictureFilename = await takePicture();
 
   const s3BucketLocation = await uploadToS3(pictureFilename);
+
+  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL!;
+
+  await axios.post(discordWebhookUrl, {
+    content: "Update Xuleta",
+    embeds: [
+      {
+        image: {
+          url: s3BucketLocation,
+        },
+      },
+    ],
+  });
 
   res.status(201).send(s3BucketLocation);
 }
