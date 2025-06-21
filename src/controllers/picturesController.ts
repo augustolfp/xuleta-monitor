@@ -49,6 +49,7 @@ async function uploadToS3(fileName: string) {
 
   const params = {
     Bucket: "xuletapictures",
+    ContentType: "image/jpeg",
     Key: fileName,
     Body: pictureContent,
   };
