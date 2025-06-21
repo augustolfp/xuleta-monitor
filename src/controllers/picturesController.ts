@@ -55,7 +55,6 @@ async function uploadToS3(fileName: string) {
   };
 
   const result = await s3.upload(params).promise();
-  console.log(result);
-  console.log("Location: ", result.Location);
+
   return result.Location;
 }
