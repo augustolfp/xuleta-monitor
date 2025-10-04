@@ -5,14 +5,41 @@ import errorHandlerMW from "./middlewares/errorHandlerMW.js";
 import cron from "node-cron";
 import axios from "axios";
 import os from "os";
+import { exec } from 'node:child_process';
 
 import router from "./routes/index.js";
 
 const app = express();
 
-cron.schedule("*/5 * * * *", () => {
-  //   console.log("running a task every minute");
-  axios.post("http://localhost:3000/picture");
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+cron.schedule("*/5 * * * *", async () => {
+  const turnOffLightsCommand = "pinctrl set 27 op dl";
+  const turnOnLightsCommand = "pinctrl set 27 op dh";
+
+  await new Promise((resolve, reject) => {
+    exec(turnOnLightsCommand, (error, stdout, stderr) => {
+      if (error) return resolve(error);
+      if (stderr) return resolve(stderr);
+      resolve(stdout);
+    });
+  });
+
+  await sleep(3000);
+
+  await axios.post("http://localhost:3000/picture");
+
+  await sleep(2000);
+
+  await new Promise((resolve, reject) => {
+    exec(turnOffLightsCommand, (error, stdout, stderr) => {
+      if (error) return resolve(error);
+      if (stderr) return resolve(stderr);
+      resolve(stdout);
+    });
+  });
 });
 
 cron.schedule("* * * * *", async () => {
